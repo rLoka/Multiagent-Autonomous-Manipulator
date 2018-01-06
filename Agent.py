@@ -1,6 +1,8 @@
 from enum import Enum
+import serial
 
 class AgentType(Enum):
+    ControllerAgent = 0
     KinematicsAgent = 1
     SensorAgent = 2
     LearningAgent = 3
