@@ -11,10 +11,10 @@ class Agent
     void SendMessage(String content);
     void ReceiveMessage(String content);
     void Act();
-    void Stop();
 
   protected:    
     HardwareSerial * _serial;
+        
     Motor * _base;
     Motor * _shaft1;
     Motor * _shaft2;
@@ -22,7 +22,11 @@ class Agent
     Motor * _shaft4;
     Motor * _tool;
 
-    void Agent::ProcessCommand(String command, int value);
+    void ProcessCommand(String command, int value);
+    void ExecuteMovement();
+    void Reset();
+    void PrintMotorPositions();
+    
 };
 
 #endif

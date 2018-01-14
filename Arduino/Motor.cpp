@@ -2,41 +2,51 @@
 #include "Servo.h"
 #include "Motor.h"
 
-Motor::Motor(int pin, int startingPosition, int lowerBound = 0, int upperBound = 180)
+Motor::Motor(int pin, int startingPosition, int lowerBound = 0, int upperBound = 180, int delayAdded = 50)
 {
     _servo.attach(pin);
     _startingPosition = startingPosition;
+    _nextPosition = startingPosition;
     _lowerBound = lowerBound;
     _upperBound = upperBound;
-
+    _delay = delayAdded;
     Reset();
 }
 
 void Motor::Reset()
 {
-    MoveToPosition(_startingPosition);
+    SetPosition(_startingPosition);
 }
 
-void Motor::MoveToPosition(int position, int delayTime = 1)
+void Motor::SetNextPosition(int position)
+{
+    _nextPosition = position;
+}
+
+bool Motor::MoveToPosition()
 {
     int currentPosition = GetPosition();
 
-    if(position > currentPosition)
+    if(_nextPosition > currentPosition)
     {
-        for(; currentPosition < position; currentPosition++)
-        {
-            SetPosition(currentPosition);
-            delay(delayTime);
-        }
+        int difference = _nextPosition - currentPosition;
+        SetPosition(currentPosition + 1);        
+        delay(difference/3 + _delay);
+
+        return true;
+    }
+    else if(_nextPosition < currentPosition)
+    {
+        int difference = currentPosition - _nextPosition;
+        SetPosition(currentPosition - 1);
+        delay(difference/3 + _delay);
+
+        return true;
     }
     else
     {
-        for(; currentPosition > position; currentPosition--)
-        {
-            SetPosition(currentPosition);
-            delay(delayTime);
-        }
-    } 
+        return false;
+    }
 }
 
 void Motor::Move(int step = 1)

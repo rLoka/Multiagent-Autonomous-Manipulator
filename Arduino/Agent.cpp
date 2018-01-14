@@ -8,12 +8,12 @@ Agent::Agent(HardwareSerial *serial)
 {
     _serial = serial;
 
-    _base = new Motor(8, 75, 0, 180);
-    _shaft1 = new Motor(7, 80, 0, 180);
-    _shaft2 = new Motor(5, 90, 0, 180);
-    _shaft3 = new Motor(4, 30, 0, 180);
-    _shaft4 = new Motor(3, 80, 0, 180);
-    _tool = new Motor(2, 110, 0, 120);
+    _base = new Motor(8, 75, 0, 180, 0);
+    _shaft1 = new Motor(7, 80, 0, 180, 50);
+    _shaft2 = new Motor(5, 90, 0, 180, 15);
+    _shaft3 = new Motor(4, 30, 0, 180, 0);
+    _shaft4 = new Motor(3, 80, 0, 180, 0);
+    _tool = new Motor(2, 111, 110, 180, 5);
 }
 
 void Agent::SendMessage(String content)
@@ -23,6 +23,7 @@ void Agent::SendMessage(String content)
 
 void Agent::ReceiveMessage(String content)
 {
+    SendMessage(content);
     int delimiterIndex = 0;
 
     String command = "";
@@ -52,43 +53,114 @@ void Agent::Act()
 {
 }
 
-void Agent::Stop()
-{
-}
 
 //private
 void Agent::ProcessCommand(String command, int value)
 {
-    //delay?
     if(command == "b")
     {
-        _base->Move(value);
+        _base->SetNextPosition(value);
     }
     else if(command == "s1")
     {
-        _shaft1->Move(value);
+        _shaft1->SetNextPosition(value);
     }
     else if(command == "s2")
     {
-        _shaft2->Move(value);
+        _shaft2->SetNextPosition(value);
     }
     else if(command == "s3")
     {
-        _shaft3->Move(value);
+        _shaft3->SetNextPosition(value);
     }
     else if(command == "s4")
     {
-        _shaft4->Move(value);
+        _shaft4->SetNextPosition(value);
     }
     else if(command == "t")
     {
+        _tool->SetNextPosition(value);
+    }
+    else if(command == "sb")
+    {
+        _base->Move(value);
+        PrintMotorPositions();
+    }
+    else if(command == "ss1")
+    {
+        _shaft1->Move(value);
+        PrintMotorPositions();
+    }
+    else if(command == "ss2")
+    {
+        _shaft2->Move(value);
+        PrintMotorPositions();
+    }
+    else if(command == "ss3")
+    {
+        _shaft3->Move(value);
+        PrintMotorPositions();
+    }
+    else if(command == "ss4")
+    {
+        _shaft4->Move(value);
+        PrintMotorPositions();
+    }
+    else if(command == "st")
+    {
         _tool->Move(value);
+        PrintMotorPositions();
+    }
+    else if(command == "e")
+    {
+        ExecuteMovement();
     }
     else if(command == "r")
     {
-        _tool->Move(value);
+        Reset();
     }
 
-    _serial->println(command);
-    _serial->println(value);
+}
+
+void Agent::ExecuteMovement()
+{
+    bool b, s1, s2, s3, s4;
+
+    do
+    {
+        s4 = _shaft4->MoveToPosition();
+        b = _base->MoveToPosition();
+        s3 = _shaft3->MoveToPosition();      
+    } while(b || s3 || s4);
+
+    do
+    {          
+        s2 = _shaft2->MoveToPosition();
+        s1 = _shaft1->MoveToPosition();        
+    } while(s1 || s2);
+
+    delay(1000);
+
+    while(_tool->MoveToPosition()){ continue; }
+
+    delay(500);
+
+    PrintMotorPositions();
+    
+}
+
+void Agent::Reset()
+{
+
+}
+
+void Agent::PrintMotorPositions()
+{
+    String motor = "b;" + String(_base->GetPosition()) + ";";
+    motor += "s1;" + String(_shaft1->GetPosition()) + ";";
+    motor += "s2;" + String(_shaft2->GetPosition()) + ";";
+    motor += "s3;" + String(_shaft3->GetPosition()) + ";";
+    motor += "s4;" + String(_shaft4->GetPosition()) + ";";
+    motor += "t;" + String(_tool->GetPosition()) + ";";
+    SendMessage(motor);
 }
