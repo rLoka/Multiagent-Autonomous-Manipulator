@@ -4,6 +4,7 @@ import math
 
 
 class Color(Enum):
+    Initial = ""
     Red = "crvena"
     Green = "zelena"
     Blue = "plava"

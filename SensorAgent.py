@@ -22,9 +22,7 @@ class SensorAgent(Agent):
             Color.Yellow: [(20, 115, 180), (80, 255, 255)],
         }
 
-        self._camera = cv2.VideoCapture(0)
-        #self._camera.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
-        #self._camera.set(cv2.CAP_PROP_EXPOSURE, 100)
+        self._camera = cv2.VideoCapture(1)
         self._camera.set(3, 1280)
         self._camera.set(4, 720)
 
@@ -45,7 +43,7 @@ class SensorAgent(Agent):
 
     # internal methods
     def DetectBlocks(self):
-        timeout = time.time() + 10
+        timeout = time.time() + 60
         blocks = []
         i = 0
         while len(blocks) <= 100:            
@@ -55,8 +53,8 @@ class SensorAgent(Agent):
                 break
             frame = self.GrabFrame()
             i = i + 1
-            #cv2.imshow("Frame", frame)
-            #key = cv2.waitKey(1) & 0xFF
+            cv2.imshow("Frame", frame)
+            key = cv2.waitKey(1) & 0xFF
             if(i >= 3):
                 for color in self._colorRange:
                     mask = self.ConstructMask(frame, color)
